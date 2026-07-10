@@ -45,6 +45,8 @@ def load_vector_store(path: str = None) -> FAISS | None:
     if not os.path.exists(load_path):
         return None
     embeddings = get_embeddings()
+    # allow_dangerous_deserialization=True 是 FAISS 的安全要求 (pickle 反序列化)
+    # 风险：仅当加载不可信的 index 文件时存在。本项目索引由用户自己构建，安全可控。
     return FAISS.load_local(load_path, embeddings, allow_dangerous_deserialization=True)
 
 

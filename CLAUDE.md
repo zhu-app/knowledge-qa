@@ -20,6 +20,7 @@ knowledge-qa/
 ├── data/faiss_index/               # Persisted FAISS index (auto-created on first upload)
 ├── .env                            # Runtime config (API keys, model endpoints) — git-ignored
 ├── .env.example                    # Template for .env
+├── pyproject.toml                  # Project metadata
 ├── requirements.txt                # Python dependencies
 ├── setup.bat                       # One-click install: venv + pip install (Tsinghua mirror)
 └── start.bat                       # Launch Streamlit on :8501
@@ -59,10 +60,10 @@ All config lives in `.env` (copy from `.env.example`):
 | `OPENAI_API_KEY` | (required) | API key for LLM |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible endpoint |
 | `LLM_MODEL` | `gpt-4o-mini` | Model name |
-| `EMBEDDING_MODEL` | `embedding-2` | Embedding model name (metadata only, actual model is hardcoded) |
+| `EMBEDDING_MODEL` | *(deprecated)* | Embedding model is hardcoded as `BAAI/bge-small-zh-v1.5` in `vector_store.py` |
 | `SIMILARITY_THRESHOLD` | `0.5` | Min relevance score to keep retrieved chunks (0.0~1.0) |
 
-`config.py` validates `OPENAI_API_KEY` at import time and exits if missing.
+`config.py` validates `OPENAI_API_KEY` at import time with a warning (no longer exits).
 
 ## Implementation Notes
 
@@ -71,3 +72,5 @@ All config lives in `.env` (copy from `.env.example`):
 - `vector_store.py` uses a module-level `_embeddings` singleton to avoid re-downloading the model.
 - `qa_chain.py`'s `QAChat` class is stateless except for the LLM instance; instantiated per-session in `st.session_state["qa_chain"]`.
 - The Streamlit app manages state via `st.session_state`: `messages`, `vector_store`, `qa_chain`.
+- `config.py` no longer calls `sys.exit(1)` on missing API key — it emits a warning and lets the app start gracefully.
+- The `.env` `EMBEDDING_MODEL` variable is deprecated; the actual model is hardcoded as `BAAI/bge-small-zh-v1.5` in `vector_store.py`.
