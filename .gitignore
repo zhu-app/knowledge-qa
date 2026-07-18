@@ -13,6 +13,7 @@ venv/
 
 # Data / vector store (can be rebuilt)
 data/
+!data/*.md
 
 # IDE
 .vscode/

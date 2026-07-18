@@ -7,8 +7,10 @@ from langchain_core.documents import Document
 # 设置 Hugging Face 镜像源（国内用户需要）
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
+# FAISS C++ 库在 Windows 上不支持中文路径，使用纯英文路径
+# 索引存储在用户主目录下的 .knowledge-qa-index/
 VECTOR_STORE_PATH = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), "..", "data", "faiss_index")
+    os.path.join(os.path.expanduser("~"), ".knowledge-qa-index")
 )
 
 # Module-level singleton — model is downloaded/loaded only once
@@ -36,13 +38,23 @@ def build_vector_store(documents: list[Document]) -> FAISS:
 
 def save_vector_store(vector_store: FAISS, path: str = None):
     save_path = path or VECTOR_STORE_PATH
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    # 确保路径是绝对路径且目录已创建
+    save_path = os.path.abspath(save_path)
+    os.makedirs(save_path, exist_ok=True)
+    # 再次确认目录可写
+    if not os.path.isdir(save_path):
+        raise RuntimeError(f"无法创建目录: {save_path}")
     vector_store.save_local(save_path)
+    # 验证文件是否已写入
+    index_file = os.path.join(save_path, "index.faiss")
+    if not os.path.isfile(index_file):
+        raise RuntimeError(f"FAISS 索引保存失败: {index_file} 未生成")
 
 
 def load_vector_store(path: str = None) -> FAISS | None:
     load_path = path or VECTOR_STORE_PATH
-    if not os.path.exists(load_path):
+    index_file = os.path.join(load_path, "index.faiss")
+    if not os.path.isfile(index_file):
         return None
     embeddings = get_embeddings()
     # allow_dangerous_deserialization=True 是 FAISS 的安全要求 (pickle 反序列化)

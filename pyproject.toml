@@ -4,13 +4,13 @@ build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
 name = "knowledge-qa"
-version = "1.1.0"
+version = "1.2.0"
 description = "RAG-based local knowledge base Q&A system with Streamlit UI, FAISS vector store, and multi-model LLM support"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "ZHU123-Develop"},
+    {name = "zhu-app"},
 ]
 keywords = ["rag", "knowledge-base", "qa", "faiss", "langchain", "streamlit"]
 classifiers = [
